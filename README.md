@@ -21,9 +21,11 @@ Use this repo to answer:
 - How should AI teammates operate?
 - What standards must every product inherit?
 - What is required before a PR merges?
+- What lifecycle moves an idea from intent to decision memory?
 
 ## Structure
 
+- `ENGINEERING_LIFECYCLE.md` — standard workflow from idea to architecture, review, approval, merge, and ADR memory.
 - `constitution/` — core doctrine, north star, product philosophy, and operating model.
 - `ai-team/` — responsibilities for AI and automation collaborators.
 - `review/` — design, product, PR, UI, and merge standards.
