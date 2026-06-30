@@ -3,20 +3,38 @@ const { loadAriyoGeoAudioChannels } = require('./geoaudio/ariyoProvider');
 const { buildUniversalDiscoveryIndex, searchUniversalDiscovery } = require('./geoaudio/discoveryIndex');
 
 function diagnosticsEnabled(options = {}) {
-  return Boolean(options.developmentDiagnostics || process.env.WAVEATLAS_DISCOVERY_DIAGNOSTICS === '1');
+  return Boolean(options?.developmentDiagnostics || process.env.WAVEATLAS_DISCOVERY_DIAGNOSTICS === '1');
+}
+
+function sanitizeLiveRadioStations(liveRadioStations) {
+  if (!Array.isArray(liveRadioStations)) return [];
+  return liveRadioStations.filter((station) => station && typeof station === 'object');
 }
 
 function countBySourceType(index) {
-  return index.reduce((counts, doc) => {
-    const sourceType = doc.sourceType || 'unknown';
+  const safeIndex = Array.isArray(index) ? index : [];
+  return safeIndex.reduce((counts, doc) => {
+    const safeDoc = doc && typeof doc === 'object' ? doc : {};
+    const sourceType = safeDoc.sourceType || 'unknown';
     counts[sourceType] = (counts[sourceType] || 0) + 1;
     return counts;
   }, {});
 }
 
+function safeMatchedDiagnostics(response) {
+  const results = Array.isArray(response?.results) ? response.results : [];
+  return results.map((doc) => ({
+    id: doc?.id,
+    sourceType: doc?.sourceType,
+    section: doc?.section,
+    title: doc?.title,
+  }));
+}
+
 function createWaveAtlasDiscoveryPipeline({ liveRadioStations = [], geoAudioSource = ariyoAlbums, developmentDiagnostics = false } = {}) {
+  const safeLiveRadioStations = sanitizeLiveRadioStations(liveRadioStations);
   const geoAudioChannels = loadAriyoGeoAudioChannels(geoAudioSource);
-  const index = buildUniversalDiscoveryIndex({ liveRadioStations, geoAudioChannels });
+  const index = buildUniversalDiscoveryIndex({ liveRadioStations: safeLiveRadioStations, geoAudioChannels });
 
   if (diagnosticsEnabled({ developmentDiagnostics })) {
     console.info('[WaveAtlas discovery] registered providers', { geoaudio: geoAudioChannels.length ? ['AriyoGeoAudio'] : [] });
@@ -28,13 +46,13 @@ function createWaveAtlasDiscoveryPipeline({ liveRadioStations = [], geoAudioSour
     if (diagnosticsEnabled({ developmentDiagnostics })) {
       console.info('[WaveAtlas discovery] search', {
         query,
-        matched: response.results.map((doc) => ({ id: doc.id, sourceType: doc.sourceType, section: doc.section, title: doc.title })),
+        matched: safeMatchedDiagnostics(response),
       });
     }
     return response;
   }
 
-  return { index, geoAudioChannels, liveRadioStations, search };
+  return { index, geoAudioChannels, liveRadioStations: safeLiveRadioStations, safeLiveRadioStations, search };
 }
 
-module.exports = { createWaveAtlasDiscoveryPipeline, countBySourceType };
+module.exports = { createWaveAtlasDiscoveryPipeline, countBySourceType, sanitizeLiveRadioStations };
