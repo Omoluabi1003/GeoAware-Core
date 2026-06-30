@@ -103,3 +103,22 @@ test('production WaveAtlas discovery pipeline registers Ariyo GeoAudio in the qu
   assert.equal(pipeline.search('OfficialPaulInspires').sections['GeoAudio Channels'][0].id, 'ariyo:officialpaulinspires-spoken-word');
   assert.equal(pipeline.search('Miami Live').sections['Live Radio'][0].sourceType, 'radio');
 });
+
+test('discovery pipeline sanitizes malformed live radio input and exposes safeLiveRadioStations', () => {
+  const pipeline = createWaveAtlasDiscoveryPipeline({
+    liveRadioStations: [null, undefined, 'bad station', liveRadioStations[0]],
+    developmentDiagnostics: true,
+  });
+
+  assert.deepEqual(pipeline.safeLiveRadioStations, [liveRadioStations[0]]);
+  assert.deepEqual(pipeline.liveRadioStations, [liveRadioStations[0]]);
+  assert.deepEqual(countBySourceType([...pipeline.index, null]), { geoaudio: 2, radio: 1, unknown: 1 });
+  assert.equal(pipeline.search('Miami Live').sections['Live Radio'][0].sourceType, 'radio');
+  assert.equal(pipeline.search('Omoluabi Productions').sections['GeoAudio Channels'][0].sourceType, 'geoaudio');
+});
+
+test('universal discovery helpers are null-safe for app startup and diagnostics paths', () => {
+  assert.deepEqual(buildUniversalDiscoveryIndex({ liveRadioStations: null, geoAudioChannels: null }), []);
+  assert.deepEqual(searchUniversalDiscovery(null, 'Omoluabi Productions').results, []);
+  assert.deepEqual(countBySourceType(null), {});
+});
