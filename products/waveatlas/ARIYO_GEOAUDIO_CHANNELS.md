@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Ariyo AI Studio albums are integrated into WaveAtlas as curated **GeoAudio Channels**: album-backed, place-aware audio queues that behave like radio-style stations without being live radio stations.
+Florida-based Ariyo AI Studio albums, produced by Omoluabi Productions, are integrated into WaveAtlas as curated **GeoAudio Channels**: album-backed, place-aware audio queues that behave like radio-style stations without being live radio stations.
 
 ## Source model
 
@@ -13,6 +13,7 @@ Expected source fields are intentionally tolerant so the adapter remains reversi
 - album identity: `id`, `slug`, or a stable generated slug from `title`
 - album title: `title` or `albumTitle`
 - curator: `curator`, `artist`, `studio`, or default `Ariyo AI Studio`
+- provider/producer/studio attribution: default `Omoluabi Productions`
 - genre: `genre`, `genres[0]`, or default `AI Afrobeats / GeoAudio`
 - tags: `tags`, `moods`, `themes`, or an empty list
 - tracks: `tracks[]`, where each valid track has a playable `url`, `audioUrl`, `src`, or `streamUrl`
@@ -27,15 +28,17 @@ Each album becomes one selectable WaveAtlas channel with this normalized shape:
   "sourceType": "geoaudio",
   "channelType": "curated_album",
   "label": "GeoAudio Channel",
-  "provider": "Ariyo AI Studio",
+  "provider": "Omoluabi Productions",
+  "producer": "Omoluabi Productions",
+  "studio": "Ariyo AI Studio",
   "title": "<album title>",
   "curator": "<album curator>",
   "genre": "<album genre>",
-  "city": "Lagos",
-  "country": "Nigeria",
-  "coordinates": { "lat": 6.5244, "lng": 3.3792 },
+  "region": "Florida",
+  "country": "United States",
+  "coordinates": { "lat": 27.6648, "lng": -81.5158 },
   "tracks": ["<normalized playable track objects>"],
-  "searchText": "<album, track, curator, genre, Lagos, Nigeria, tags>"
+  "searchText": "<album, track, curator, genre, Florida, United States, Ariyo AI Studio, Omoluabi Productions, tags>"
 }
 ```
 
@@ -63,10 +66,13 @@ Stable channel metadata:
 - album title
 - curator
 - genre
-- city
+- Nigerian/Afrobeats cultural tags when present, without treating those tags as the studio location
+- region
 - country
 - `GeoAudio Channel` label
-- provider: `Ariyo AI Studio`
+- provider: `Omoluabi Productions`
+- producer: `Omoluabi Productions`
+- studio: `Ariyo AI Studio`
 
 Per-track metadata:
 
@@ -76,7 +82,7 @@ Per-track metadata:
 
 ## Beacon behavior
 
-WaveAtlas should render the active map beacon for a selected Ariyo GeoAudio Channel the same way it renders an active station beacon, using the channel coordinates. Lagos, Nigeria is the default anchor for Ariyo channels unless an album explicitly provides a more precise supported place.
+WaveAtlas should render the active map beacon for a selected Ariyo GeoAudio Channel the same way it renders an active station beacon, using the channel coordinates. Florida, United States is the default anchor for Ariyo channels unless an album explicitly provides a more precise supported location.
 
 ## Search behavior
 
@@ -86,10 +92,12 @@ WaveAtlas search must index Ariyo GeoAudio Channels by:
 - current and queued track titles
 - curator
 - genre
-- city: Lagos
-- country: Nigeria
+- region: Florida
+- country: United States
+- studio: Ariyo AI Studio
 - tags, moods, and themes
-- provider: Ariyo AI Studio
+- provider: Omoluabi Productions
+- producer: Omoluabi Productions
 - label: GeoAudio Channel
 
 Search results should show Ariyo albums as GeoAudio Channels, not live stations.
