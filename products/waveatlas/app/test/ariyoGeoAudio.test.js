@@ -61,26 +61,31 @@ test('loadAriyoGeoAudioChannels accepts real object shape, bare arrays, and malf
   assert.equal(loadAriyoGeoAudioChannels(albums).length, albums.length);
   assert.deepEqual(loadAriyoGeoAudioChannels(null), []);
   assert.deepEqual(loadAriyoGeoAudioChannels(undefined), []);
+  assert.deepEqual(loadAriyoGeoAudioChannels('not an Ariyo source'), []);
   assert.deepEqual(loadAriyoGeoAudioChannels({ albums: null }), []);
 });
 
 test('malformed album and track records do not crash the Ariyo adapter', () => {
-  const channels = loadAriyoGeoAudioChannels([
+  const sourceAlbums = [
     null,
     undefined,
     'not an album',
     { title: 'Malformed Tracks', tracks: [null, undefined, 'not a track', { title: 'Playable', audioUrl: 'https://example.com/playable.mp3' }] },
+  ];
+  const channels = loadAriyoGeoAudioChannels([
+    ...sourceAlbums,
   ]);
   assert.equal(channels.length, 1);
   assert.equal(channels[0].title, 'Malformed Tracks');
   assert.equal(channels[0].tracks.length, 4);
   assert.equal(selectGeoAudioChannel(channels[0]).playback.audioUrl, 'https://example.com/playable.mp3');
   assert.equal(selectGeoAudioChannel(null).message, 'This GeoAudio Channel is temporarily unavailable.');
+  assert.equal(sourceAlbums[3].tracks[3].audioUrl, 'https://example.com/playable.mp3');
 });
 
 test('real Ariyo object shape produces searchable Omoluabi Productions and Ariyo AI Studio documents', () => {
   const geoAudioChannels = loadAriyoGeoAudioChannels({ generatedAt: '2026-06-30T00:00:00.000Z', albums });
   const index = buildUniversalDiscoveryIndex({ liveRadioStations, geoAudioChannels });
-  assert.ok(searchUniversalDiscovery(index, 'Omoluabi Productions').sections['GeoAudio Channels'].some((result) => result.sourceType === 'geoaudio'));
-  assert.ok(searchUniversalDiscovery(index, 'Ariyo AI Studio').sections['GeoAudio Channels'].some((result) => result.sourceType === 'geoaudio'));
+  assert.ok(searchUniversalDiscovery(index, 'Omoluabi Productions').sections['GeoAudio Channels'].some((result) => result.sourceType === 'geoaudio' && result.source.producer === 'Omoluabi Productions'));
+  assert.ok(searchUniversalDiscovery(index, 'Ariyo AI Studio').sections['GeoAudio Channels'].some((result) => result.sourceType === 'geoaudio' && result.source.studio === 'Ariyo AI Studio'));
 });
