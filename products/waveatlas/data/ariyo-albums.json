@@ -1,0 +1,38 @@
+[
+  {
+    "id": "kindness",
+    "title": "Kindness",
+    "curator": "Ariyo AI Studio",
+    "genre": "Spoken Word / Inspirational GeoAudio",
+    "tags": ["kindness", "encouragement", "Florida", "GeoAudio", "Ariyo AI Studio", "Omoluabi Productions"],
+    "tracks": [
+      {
+        "id": "kindness-opening",
+        "title": "Kindness Opening Reflection",
+        "audioUrl": "https://media.omoluabi.productions/ariyo/kindness-opening.mp3",
+        "tags": ["kindness", "reflection"]
+      },
+      {
+        "id": "kindness-daily-practice",
+        "title": "Daily Practice of Kindness",
+        "audioUrl": "https://media.omoluabi.productions/ariyo/daily-practice-of-kindness.mp3",
+        "tags": ["practice", "encouragement"]
+      }
+    ]
+  },
+  {
+    "id": "officialpaulinspires-spoken-word",
+    "title": "OfficialPaulInspires Spoken Word",
+    "curator": "OfficialPaulInspires",
+    "genre": "Spoken Word / Faith Inspiration",
+    "tags": ["OfficialPaulInspires", "spoken word", "faith", "Florida", "GeoAudio"],
+    "tracks": [
+      {
+        "id": "officialpaulinspires-welcome",
+        "title": "OfficialPaulInspires Welcome",
+        "audioUrl": "https://media.omoluabi.productions/ariyo/officialpaulinspires-welcome.mp3",
+        "tags": ["OfficialPaulInspires", "welcome"]
+      }
+    ]
+  }
+]
