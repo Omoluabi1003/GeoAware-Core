@@ -4,6 +4,7 @@ const albums = require('../../data/ariyo-albums.json');
 const { loadAriyoGeoAudioChannels, resolveAriyoAlbums } = require('../geoaudio/ariyoProvider');
 const { buildUniversalDiscoveryIndex, searchUniversalDiscovery } = require('../geoaudio/discoveryIndex');
 const { selectGeoAudioChannel } = require('../geoaudio/selectGeoAudioChannel');
+const { createWaveAtlasDiscoveryPipeline, countBySourceType } = require('../discoveryPipeline');
 
 const liveRadioStations = [{ id: 'radio:miami', name: 'Miami Live', country: 'United States', genre: 'News', streamUrl: 'https://example.com/live.mp3' }];
 
@@ -88,4 +89,17 @@ test('real Ariyo object shape produces searchable Omoluabi Productions and Ariyo
   const index = buildUniversalDiscoveryIndex({ liveRadioStations, geoAudioChannels });
   assert.ok(searchUniversalDiscovery(index, 'Omoluabi Productions').sections['GeoAudio Channels'].some((result) => result.sourceType === 'geoaudio' && result.source.producer === 'Omoluabi Productions'));
   assert.ok(searchUniversalDiscovery(index, 'Ariyo AI Studio').sections['GeoAudio Channels'].some((result) => result.sourceType === 'geoaudio' && result.source.studio === 'Ariyo AI Studio'));
+});
+
+
+test('production WaveAtlas discovery pipeline registers Ariyo GeoAudio in the queried index', () => {
+  const pipeline = createWaveAtlasDiscoveryPipeline({ liveRadioStations });
+
+  assert.equal(pipeline.geoAudioChannels.length, albums.length);
+  assert.deepEqual(countBySourceType(pipeline.index), { geoaudio: 2, radio: 1 });
+  assert.ok(pipeline.index.some((doc) => doc.sourceType === 'geoaudio' && doc.searchText.includes('omoluabi productions')));
+  assert.ok(pipeline.search('Omoluabi Productions').sections['GeoAudio Channels'].some((result) => result.source.studio === 'Ariyo AI Studio'));
+  assert.equal(pipeline.search('Kindness').sections['GeoAudio Channels'][0].id, 'ariyo:kindness');
+  assert.equal(pipeline.search('OfficialPaulInspires').sections['GeoAudio Channels'][0].id, 'ariyo:officialpaulinspires-spoken-word');
+  assert.equal(pipeline.search('Miami Live').sections['Live Radio'][0].sourceType, 'radio');
 });
