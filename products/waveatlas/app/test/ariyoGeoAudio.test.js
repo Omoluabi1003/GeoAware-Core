@@ -5,6 +5,7 @@ const { loadAriyoGeoAudioChannels, resolveAriyoAlbums } = require('../geoaudio/a
 const { buildUniversalDiscoveryIndex, searchUniversalDiscovery } = require('../geoaudio/discoveryIndex');
 const { selectGeoAudioChannel } = require('../geoaudio/selectGeoAudioChannel');
 const { createWaveAtlasDiscoveryPipeline, countBySourceType } = require('../discoveryPipeline');
+const { createWaveAtlasSearchController } = require('../searchController');
 
 const liveRadioStations = [{ id: 'radio:miami', name: 'Miami Live', country: 'United States', genre: 'News', streamUrl: 'https://example.com/live.mp3' }];
 
@@ -121,4 +122,39 @@ test('universal discovery helpers are null-safe for app startup and diagnostics 
   assert.deepEqual(buildUniversalDiscoveryIndex({ liveRadioStations: null, geoAudioChannels: null }), []);
   assert.deepEqual(searchUniversalDiscovery(null, 'Omoluabi Productions').results, []);
   assert.deepEqual(countBySourceType(null), {});
+});
+
+test('live app search controller wires the search box path to universal discovery and GeoAudio selection', () => {
+  const controller = createWaveAtlasSearchController({
+    liveRadioStations: [{ id: 'radio:fl', name: 'Florida Live Radio', city: 'Miami', streamUrl: 'https://example.com/live.mp3' }],
+  });
+
+  const ariyoResults = controller.search('Omoluabi Productions');
+  assert.ok(ariyoResults.sections['GeoAudio Channels'].some((result) => result.title === 'Kindness'));
+  assert.equal(ariyoResults.sections['GeoAudio Channels'][0].badge, 'GeoAudio Channel');
+
+  const selected = controller.selectResult(ariyoResults.sections['GeoAudio Channels'][0]);
+  assert.equal(selected.sourceType, 'geoaudio');
+  assert.deepEqual(selected.flyTo, { lat: 27.6648, lng: -81.5158 });
+  assert.equal(selected.beacon.label, 'GeoAudio Channel');
+  assert.equal(selected.metadata.provider, 'Omoluabi Productions');
+  assert.equal(selected.metadata.studio, 'Ariyo AI Studio');
+  assert.ok(selected.playback.audioUrl);
+});
+
+test('live app search controller keeps live radio search and playback distinct from GeoAudio', () => {
+  const controller = createWaveAtlasSearchController({
+    liveRadioStations: [{ id: 'radio:fl', name: 'Florida Live Radio', city: 'Miami', streamUrl: 'https://example.com/live.mp3' }],
+  });
+
+  const radioResults = controller.search('Florida Live Radio');
+  assert.equal(radioResults.sections['Live Radio'][0].sourceType, 'radio');
+  assert.equal(radioResults.sections['Live Radio'][0].label, 'Live Radio');
+  assert.deepEqual(controller.selectResult(radioResults.sections['Live Radio'][0]), {
+    sourceType: 'radio',
+    station: radioResults.sections['Live Radio'][0].source,
+    playback: { streamUrl: 'https://example.com/live.mp3' },
+  });
+
+  assert.equal(controller.search('does-not-exist').message, controller.noResultsMessage);
 });
