@@ -1,17 +1,19 @@
 function firstValidTrack(channel) {
-  return (channel.tracks || []).find((track) => Boolean(track.audioUrl));
+  const tracks = Array.isArray(channel?.tracks) ? channel.tracks : [];
+  return tracks.find((track) => Boolean(track?.audioUrl));
 }
 
 function selectGeoAudioChannel(channel) {
-  const track = firstValidTrack(channel);
+  const safeChannel = channel && typeof channel === 'object' ? channel : {};
+  const track = firstValidTrack(safeChannel);
   if (!track) {
     return {
       sourceType: 'geoaudio',
       unavailable: true,
       message: 'This GeoAudio Channel is temporarily unavailable.',
-      flyTo: channel.coordinates,
-      beacon: { coordinates: channel.coordinates, sourceType: 'geoaudio', label: channel.label },
-      metadata: channel,
+      flyTo: safeChannel.coordinates,
+      beacon: { coordinates: safeChannel.coordinates, sourceType: 'geoaudio', label: safeChannel.label },
+      metadata: safeChannel,
       track: null,
     };
   }
@@ -19,22 +21,22 @@ function selectGeoAudioChannel(channel) {
     sourceType: 'geoaudio',
     unavailable: false,
     message: '',
-    flyTo: channel.coordinates,
-    beacon: { coordinates: channel.coordinates, sourceType: 'geoaudio', label: channel.label },
+    flyTo: safeChannel.coordinates,
+    beacon: { coordinates: safeChannel.coordinates, sourceType: 'geoaudio', label: safeChannel.label },
     metadata: {
-      title: channel.title,
-      provider: channel.provider,
-      producer: channel.producer,
-      studio: channel.studio,
-      region: channel.region,
-      country: channel.country,
-      label: channel.label,
-      curator: channel.curator,
-      genre: channel.genre,
+      title: safeChannel.title,
+      provider: safeChannel.provider,
+      producer: safeChannel.producer,
+      studio: safeChannel.studio,
+      region: safeChannel.region,
+      country: safeChannel.country,
+      label: safeChannel.label,
+      curator: safeChannel.curator,
+      genre: safeChannel.genre,
     },
     track,
     playback: { audioUrl: track.audioUrl, startsAtTrackId: track.id },
   };
 }
 
-module.exports = { selectGeoAudioChannel };
+module.exports = { firstValidTrack, selectGeoAudioChannel };
