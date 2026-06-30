@@ -16,3 +16,9 @@ WaveAtlas supports curated GeoAudio Channels alongside live radio stations. GeoA
 
 Ariyo AI Studio albums are the first required GeoAudio Channel source. Each Ariyo album should appear as a selectable Florida, United States-anchored channel with `sourceType: geoaudio`, album-level identity, Omoluabi Productions attribution, and track-level playback metadata. See `products/waveatlas/ARIYO_GEOAUDIO_CHANNELS.md` for the adapter contract.
 
+
+## Universal GeoAware Discovery
+
+WaveAtlas discovery must use one shared Discovery Index for Live Radio, GeoAudio Channels, Editorial, and future content types. Results should be grouped and clearly labeled as GeoAudio Channels, Live Radio, Countries, Cities, Genres, Languages, and Editorial when those groups have matches.
+
+GeoAudio Channel records must index provider, producer, studio, location, album titles, track titles, genre, curator, and tags so searches for Omoluabi Productions, Ariyo AI Studio, album titles, or track titles return the parent Ariyo AI Studio GeoAudio Channel. If nothing matches, WaveAtlas must show: “No radio stations or GeoAudio Channels matched your search. Try a location, artist, producer, album, studio, genre, or language.”

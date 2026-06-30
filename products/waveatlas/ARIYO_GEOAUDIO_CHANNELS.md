@@ -13,10 +13,10 @@ Expected source fields are intentionally tolerant so the adapter remains reversi
 - album identity: `id`, `slug`, or a stable generated slug from `title`
 - album title: `title` or `albumTitle`
 - curator: `curator`, `artist`, `studio`, or default `Ariyo AI Studio`
-- provider/producer/studio attribution: default `Omoluabi Productions`
+- provider/producer attribution: default `Omoluabi Productions`
 - genre: `genre`, `genres[0]`, or default `AI Afrobeats / GeoAudio`
 - tags: `tags`, `moods`, `themes`, or an empty list
-- tracks: `tracks[]`, where each valid track has a playable `url`, `audioUrl`, `src`, or `streamUrl`
+- tracks: object-based `tracks[]` entries with canonical `audioUrl`; accepted source aliases are `url`, `src`, `streamUrl`, and `filePath`
 
 ## Channel mapping
 
@@ -37,12 +37,23 @@ Each album becomes one selectable WaveAtlas channel with this normalized shape:
   "region": "Florida",
   "country": "United States",
   "coordinates": { "lat": 27.6648, "lng": -81.5158 },
-  "tracks": ["<normalized playable track objects>"],
-  "searchText": "<album, track, curator, genre, Florida, United States, Ariyo AI Studio, Omoluabi Productions, tags>"
+  "tracks": [
+    {
+      "id": "<track-id>",
+      "title": "<track title>",
+      "audioUrl": "<playable audio url>",
+      "durationSeconds": "<optional>",
+      "artworkUrl": "<optional>",
+      "tags": ["<optional tags>"]
+    }
+  ],
+  "searchText": "<album, track, curator, producer, studio, genre, Florida, United States, Ariyo AI Studio, Omoluabi Productions, tags>"
 }
 ```
 
 The adapter must set `sourceType: geoaudio`. It must never coerce Ariyo channels into `sourceType: radio`, because live radio stations represent external streams while GeoAudio Channels represent curated album queues.
+
+`audioUrl` is the canonical normalized playable field for every track. The adapter may accept `url`, `src`, `streamUrl`, or `filePath` from source content, but it must normalize the selected playable value into `audioUrl` before playback, metadata display, and discovery indexing.
 
 ## Playback behavior
 
@@ -51,11 +62,12 @@ When a user selects an Ariyo GeoAudio Channel, WaveAtlas starts the first valid 
 Playback rules:
 
 1. Filter out tracks without a playable audio URL before playback begins.
-2. Start at the first valid track when selected.
-3. Auto-advance to the next valid track when a track ends.
-4. If a track fails to load or errors during playback, skip to the next valid track in the same album queue.
-5. Stop at the end of the album unless the user or product configuration enables repeat.
-6. Do not fall through from a failed Ariyo track into a live radio station or another album.
+2. If no valid tracks remain after filtering, mark the GeoAudio Channel unavailable and show: “This GeoAudio Channel is temporarily unavailable.” Do not spin forever, crash, or fall back into live radio.
+3. Start at the first valid track when selected.
+4. Auto-advance to the next valid track when a track ends.
+5. If a track fails to load or errors during playback, skip to the next valid track in the same album queue.
+6. Stop at the end of the album unless the user or product configuration enables repeat.
+7. Do not fall through from a failed Ariyo track into a live radio station or another album.
 
 ## Metadata behavior
 
@@ -84,21 +96,37 @@ Per-track metadata:
 
 WaveAtlas should render the active map beacon for a selected Ariyo GeoAudio Channel the same way it renders an active station beacon, using the channel coordinates. Florida, United States is the default anchor for Ariyo channels unless an album explicitly provides a more precise supported location.
 
-## Search behavior
+## Discovery behavior
+
+WaveAtlas search must use one Universal GeoAware Discovery Index that can support Live Radio, GeoAudio Channels, Editorial, and future content types without fragmenting search behavior by source. GeoAudio Channels must be additive records in that index; they must not alter live radio station records or live radio playback behavior.
 
 WaveAtlas search must index Ariyo GeoAudio Channels by:
 
-- album title
-- current and queued track titles
-- curator
-- genre
-- region: Florida
-- country: United States
-- studio: Ariyo AI Studio
-- tags, moods, and themes
 - provider: Omoluabi Productions
 - producer: Omoluabi Productions
+- studio: Ariyo AI Studio
+- region: Florida
+- country: United States
 - label: GeoAudio Channel
+- album titles
+- track titles
+- genre
+- curator
+- tags, moods, and themes
+
+Searching “Omoluabi Productions” must return Ariyo AI Studio GeoAudio Channels. Searching an album title or track title must return the parent GeoAudio Channel, not a detached track result.
+
+Search results must be grouped and clearly labeled in these discovery sections when matching records exist:
+
+- GeoAudio Channels
+- Live Radio
+- Countries
+- Cities
+- Genres
+- Languages
+- Editorial
+
+The no-result message must be: “No radio stations or GeoAudio Channels matched your search. Try a location, artist, producer, album, studio, genre, or language.”
 
 Search results should show Ariyo albums as GeoAudio Channels, not live stations.
 
