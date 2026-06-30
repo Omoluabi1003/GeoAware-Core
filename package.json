@@ -1,0 +1,6 @@
+{
+  "scripts": {
+    "test": "node --test products/waveatlas/app/test/*.test.js"
+  },
+  "devDependencies": {}
+}
