@@ -1,7 +1,7 @@
 const assert = require('node:assert/strict');
 const test = require('node:test');
 const albums = require('../../data/ariyo-albums.json');
-const { loadAriyoGeoAudioChannels } = require('../geoaudio/ariyoProvider');
+const { loadAriyoGeoAudioChannels, resolveAriyoAlbums } = require('../geoaudio/ariyoProvider');
 const { buildUniversalDiscoveryIndex, searchUniversalDiscovery } = require('../geoaudio/discoveryIndex');
 const { selectGeoAudioChannel } = require('../geoaudio/selectGeoAudioChannel');
 
@@ -43,4 +43,44 @@ test('selecting a GeoAudio Channel flies to Florida, renders a beacon, exposes m
 test('GeoAudio Channels with no valid track show the unavailable message', () => {
   const [channel] = loadAriyoGeoAudioChannels([{ title: 'Unavailable', tracks: [{ title: 'Missing URL' }] }]);
   assert.equal(selectGeoAudioChannel(channel).message, 'This GeoAudio Channel is temporarily unavailable.');
+});
+
+
+test('resolveAriyoAlbums accepts real object shape, bare arrays, and malformed sources', () => {
+  const realShape = { generatedAt: '2026-06-30T00:00:00.000Z', albums };
+  assert.equal(resolveAriyoAlbums(realShape), albums);
+  assert.equal(resolveAriyoAlbums(albums), albums);
+  assert.deepEqual(resolveAriyoAlbums(null), []);
+  assert.deepEqual(resolveAriyoAlbums(undefined), []);
+  assert.deepEqual(resolveAriyoAlbums({ generatedAt: '2026-06-30T00:00:00.000Z' }), []);
+});
+
+test('loadAriyoGeoAudioChannels accepts real object shape, bare arrays, and malformed sources without throwing', () => {
+  const realShape = { generatedAt: '2026-06-30T00:00:00.000Z', albums };
+  assert.equal(loadAriyoGeoAudioChannels(realShape).length, albums.length);
+  assert.equal(loadAriyoGeoAudioChannels(albums).length, albums.length);
+  assert.deepEqual(loadAriyoGeoAudioChannels(null), []);
+  assert.deepEqual(loadAriyoGeoAudioChannels(undefined), []);
+  assert.deepEqual(loadAriyoGeoAudioChannels({ albums: null }), []);
+});
+
+test('malformed album and track records do not crash the Ariyo adapter', () => {
+  const channels = loadAriyoGeoAudioChannels([
+    null,
+    undefined,
+    'not an album',
+    { title: 'Malformed Tracks', tracks: [null, undefined, 'not a track', { title: 'Playable', audioUrl: 'https://example.com/playable.mp3' }] },
+  ]);
+  assert.equal(channels.length, 1);
+  assert.equal(channels[0].title, 'Malformed Tracks');
+  assert.equal(channels[0].tracks.length, 4);
+  assert.equal(selectGeoAudioChannel(channels[0]).playback.audioUrl, 'https://example.com/playable.mp3');
+  assert.equal(selectGeoAudioChannel(null).message, 'This GeoAudio Channel is temporarily unavailable.');
+});
+
+test('real Ariyo object shape produces searchable Omoluabi Productions and Ariyo AI Studio documents', () => {
+  const geoAudioChannels = loadAriyoGeoAudioChannels({ generatedAt: '2026-06-30T00:00:00.000Z', albums });
+  const index = buildUniversalDiscoveryIndex({ liveRadioStations, geoAudioChannels });
+  assert.ok(searchUniversalDiscovery(index, 'Omoluabi Productions').sections['GeoAudio Channels'].some((result) => result.sourceType === 'geoaudio'));
+  assert.ok(searchUniversalDiscovery(index, 'Ariyo AI Studio').sections['GeoAudio Channels'].some((result) => result.sourceType === 'geoaudio'));
 });
