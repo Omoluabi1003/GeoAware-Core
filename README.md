@@ -26,6 +26,7 @@ Use this repo to answer:
 ## Structure
 
 - `ENGINEERING_LIFECYCLE.md` — standard workflow from idea to architecture, review, approval, merge, and ADR memory.
+- `GOVERNANCE_BRIDGE.md` — inheritance policy for Omoluabi1003 ecosystem repositories that reference GeoAware-Core.
 - `constitution/` — core doctrine, north star, product philosophy, and operating model.
 - `ai-team/` — responsibilities for AI and automation collaborators.
 - `review/` — design, product, PR, UI, and merge standards.
