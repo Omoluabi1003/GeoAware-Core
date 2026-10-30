@@ -30,6 +30,7 @@ Use this repo to answer:
 - `constitution/` — core doctrine, north star, product philosophy, and operating model.
 - `ai-team/` — responsibilities for AI and automation collaborators.
 - `review/` — design, product, PR, UI, and merge standards.
+  See the optional [review-profile workflow](review/AGENT_REVIEW.md) for evidence-based product and security reviews.
 - `products/` — product-specific identity and inheritance files.
 - `principles/` — ecosystem non-negotiables.
 - `standards/` — accessibility, performance, security, and architecture standards.

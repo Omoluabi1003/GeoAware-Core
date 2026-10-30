@@ -78,3 +78,7 @@ Do not:
 AI assists. Humans approve.
 
 GeoAware-Core sets the standard. Child repositories inherit the discipline.
+
+For a scoped product review, the optional [review profiles](review/AGENT_REVIEW.md)
+provide focused checklists. They do not change governance, tool permissions,
+delegation rules, existing checks or human approval.
