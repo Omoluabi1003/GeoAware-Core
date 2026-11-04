@@ -1,5 +1,19 @@
 # GeoAware-Core
 
+## Project at a glance
+
+**Category:** Canonical GeoAware governance repository  
+**Purpose:** Maintain engineering doctrine, architectural standards, review practice and product inheritance contracts  
+**Audience:** Users, implementers, contributors and potential partners  
+**Code:** https://github.com/Omoluabi1003/GeoAware-Core
+
+**Implementation context:** Documentation-first repository; not an application service or replacement for runtime geospatial operations.
+
+The sections below describe the product philosophy, architecture and available development workflows. Confirm feature readiness through the actual code and release before using it operationally.
+
+---
+
+
 GeoAware-Core is the canonical source of truth for the GeoAware ecosystem.
 
 It defines the constitution, operating doctrine, AI engineering model, product philosophy, review standards, and product inheritance rules that every GeoAware product must follow.
