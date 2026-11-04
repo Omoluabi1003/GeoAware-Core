@@ -25,6 +25,7 @@ Use this repo to answer:
 
 ## Structure
 
+- `integrations/` — registered ecosystem integrations, implementation owners, setup links, and readiness boundaries.
 - `ENGINEERING_LIFECYCLE.md` — standard workflow from idea to architecture, review, approval, merge, and ADR memory.
 - `GOVERNANCE_BRIDGE.md` — inheritance policy for Omoluabi1003 ecosystem repositories that reference GeoAware-Core.
 - `constitution/` — core doctrine, north star, product philosophy, and operating model.
@@ -35,6 +36,11 @@ Use this repo to answer:
 - `principles/` — ecosystem non-negotiables.
 - `standards/` — accessibility, performance, security, and architecture standards.
 - `templates/` — durable PR and review templates.
+
+## Registered integrations
+
+- [Agent Desktop for GeoCore/Aware](integrations/AGENT_DESKTOP.md) — optional
+  observation-only GIS QA bridge implemented in OIC, with setup and readiness notes.
 
 ## Authority
 
